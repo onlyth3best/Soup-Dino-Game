@@ -8,6 +8,8 @@
 <img width="2000" height="1500" alt="2" src="https://github.com/user-attachments/assets/7c6db85a-201e-45b0-9061-f54f61fd765c" />
 <img width="1500" height="2000" alt="1" src="https://github.com/user-attachments/assets/0be237e9-b9ff-4daa-a032-2ac1a5dbb8cd" />
 
+<img width="576" height="891" alt="image" src="https://github.com/user-attachments/assets/18bd38b0-0978-4ddd-a4e5-551dda8d7aa3" />
+
 
 
 Wiring:
