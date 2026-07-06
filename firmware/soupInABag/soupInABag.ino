@@ -16,13 +16,14 @@ std::vector<int> jumpList;
 
 void setup() {
   beginJumpStuffs();
-  beginCactusStuffs();
+  //beginCactusStuffs();
 }
 
 void loop()
 {
   jumpCheckLoop();
-  cactusMoveLoop();
+  // cactusMoveLoop();
+  // sensorIsOn();
 }
 
 #pragma endregion systemFuncs
@@ -35,6 +36,7 @@ void beginJumpStuffs() {
 }
 
 int jumpMilSecs = 0;
+int failedChecks = 0;
 // - - - - - - -
 void jumpCheckLoop(){
   long vsenstime;
@@ -47,14 +49,33 @@ void jumpCheckLoop(){
     jumpMilSecs++;
   else if(jumpMilSecs != 0)
   {
-    Serial.println(jumpMilSecs);
+    if(jumpMilSecs >= 50000)
+    {
+      Serial.print(failedChecks);
+      Serial.print("    ");
+      Serial.println(jumpMilSecs);
+      failedChecks = 0;
+    }
+    else
+      failedChecks++;
     jumpList.push_back(jumpMilSecs);
     jumpMilSecs = 0;
   }
 }
+// - - - - - - - \*
+// void JumpCheck() {
+//   if (jumpMilSecs > 100) {
+//     if ((jumpList[1]) > 200) {
+//       isJumping == true;
+
+      // Serial.print(random(2, 500));
+      // Serial.println("PLAYER IS JUMPINGG");
+//     }
+//   }
+// }
 
 #pragma endregion jumpCodings
-
+/* - - - - - - - - - - - - - - - - - // - - - - - - - - - - - - - - - - - */
 #pragma region cactusControls
 
 
@@ -67,7 +88,7 @@ int minDelay = 2000, maxDelay = 7001;
 
 void beginCactusStuffs() {
   // pinMode(LED_BUILTIN, OUTPUT); //LED_BUITIN always hits the built in LED for some reason
-  Serial.begin(9600);
+  // Serial.begin(9600);
   randomSeed(analogRead(A0));
   pinMode(signalCord, INPUT);
   cactus.attach(D10);
@@ -98,7 +119,7 @@ void popOut()
 void waitForRandomTime()
 {
   int rand = random(minDelay, maxDelay);
-  Serial.println(rand);
+  // Serial.println(rand);
   delay(rand);
 }
 
@@ -106,39 +127,15 @@ void waitForRandomTime()
 #pragma endregion cactusControls
 
 
-
-
-
-
-
-
-
-/* - - - - - - - - - - - - - - - - - // - - - - - - - - - - - - - - - - - */
-// void JumpCheck() {
-//   if (jumpMilSecs > 200) {
-//     if (((jumpList[jumpMilSecs + 1]) && (jumpList[jumpMilSecs + 2]) && (jumpList[jumpMilSecs + 3]) && (jumpList[jumpMilSecs + 4])) > 200) {
-//       isJumping == true;
-//       Serial.println("PLAYER IS JUMPINGG");
-//     }
+// void sensorIsOn() {
+//   if (digitalRead(VSENS) == HIGH) {
+//     Serial.println("The sensor is on!");
+//     delay(100);
 //   }
 // }
+
 /* - - - - - - - - - - - - - - - - - // - - - - - - - - - - - - - - - - - */
   //
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
                     // #include <Wire.h>
@@ -152,7 +149,7 @@ void waitForRandomTime()
 
 
                     // void setup() {
-                    //   Serial.begin(9600);
+                    // Serial.begin(9600);
                     //   Wire.begin();
 
                     //   // display.clearDisplay();
@@ -216,7 +213,7 @@ void waitForRandomTime()
                     //   // display.print("Current Rotation:");
                     //   // display.setCursor(0, 16);
                     //   // display.print(rotationZ);
-                    //   Serial.println(rotationZ);
+                    // Serial.println(rotationZ);
                     // }
                     // }
                     // }
