@@ -6,7 +6,7 @@ int VSENS = D1;
 
 // int currentNUMBER = 0;
 // int startNum = 0;
-bool isJumping = false;
+// bool isJumping = false;
 // long startTime = millis(); // track time
 int jumpSensitivity = 1000;
 int failedCheckThreshold = 125;
@@ -15,19 +15,24 @@ int failedCheckThreshold = 125;
 int lastTimeChecked;
 int timeElapsed;
 
+bool jumpedWithCactusOut = false;
+bool gameOver = false;
+
 /* - - - - - - - - - - - - - - - - - // - - - - - - - - - - - - - - - - - */
 #pragma region systemFuncs
 
 void setup() {
   beginJumpStuffs();
-  //beginCactusStuffs();
+  beginCactusStuffs();
 }
 
 void loop()
 {
   ElapseTime();
   jumpCheckLoop();
-  cactusMoveLoop();
+
+  if(!gameOver)
+    cactusMoveLoop();
   // sensorIsOn();
 }
 
@@ -78,11 +83,16 @@ void jumpCheckLoop(){
 void JumpCheck() {
   if (jumpMilSecs > jumpSensitivity) {
     if (failedChecks <= failedCheckThreshold) {
-      isJumping == true;
+      // isJumping == true;
+      jumpedWithCactusOut = true;
 
       // Serial.print(random(2, 500));
-      Serial.println("PLAYER IS JUMPINGG");
+      if(gameOver)
+        Serial.println("PLAYER IS JUMPINGG");
       // Serial.println(jumpMilSecs);
+
+      if(gameOver)
+        gameOver = false;
     }
   }
 }
@@ -93,7 +103,7 @@ void JumpCheck() {
 
 
 Servo cactus;
-int signalCord = D0;
+// int signalCord = D0;
 int signalTime = 2;
 int popOutTime = 1000;
 int minDelay = 2000, maxDelay = 7001;
@@ -106,7 +116,7 @@ void beginCactusStuffs() {
   // pinMode(LED_BUILTIN, OUTPUT); //LED_BUITIN always hits the built in LED for some reason
   // Serial.begin(9600);
   randomSeed(analogRead(A0));
-  pinMode(signalCord, INPUT);
+  // pinMode(signalCord, INPUT);
   cactus.attach(D10);
 
   stage = "cooldown";
@@ -119,21 +129,36 @@ void cactusMoveLoop() {
   // popOut();
 
   if(delayCactusStepForSecs("cooldown", decidedDelayTime, "popOut")) //waits for cooldown (on popOut)
-    cactus.write(80);
+  {
+    jumpedWithCactusOut = false;
+    
+    cactus.write(0);
+    Serial.println("Moved to popOut");
+  }
   else if(delayCactusStepForSecs("popOut", popOutTime, "cooldown")) //waits for popOutTime (onCooldown)
   {
-    cactus.write(0);
+    Serial.println("Moved to cooldown");
+    if(jumpedWithCactusOut)
+    {
+      cactus.write(120);
+    }
+    else
+    {
+      gameOver = true;
+      delay(5000);
+    }
+
     decidedDelayTime = chooseRandTimeToWait();
   }
 }
 
 void SignalAttempt()
 {
-  pinMode(signalCord, OUTPUT); //This part is to send a signal to know that it wants to throw the cactus
-  digitalWrite(signalCord, HIGH);
+  // pinMode(signalCord, OUTPUT); //This part is to send a signal to know that it wants to throw the cactus
+  // digitalWrite(signalCord, HIGH);
   delay(signalTime);
-  digitalWrite(signalCord, LOW);
-  pinMode(signalCord, INPUT);
+  // digitalWrite(signalCord, LOW);
+  // pinMode(signalCord, INPUT);
 }
 
 void popOut()
@@ -161,6 +186,7 @@ bool delayCactusStepForSecs(String step, int timeToStall, String nextStep)
 {
   if(step == stage)
   {
+    // Serial.println(step);
     timeSinceLastPassedStep += timeElapsed;
     
     if(timeSinceLastPassedStep >= timeToStall)
@@ -175,5 +201,3 @@ bool delayCactusStepForSecs(String step, int timeToStall, String nextStep)
 }
 
 #pragma endregion cactusControls
-
-                    // }
