@@ -1,3 +1,4 @@
+#include <Servo.h>
 #include <vector>
 
 int VSENS = D0;
@@ -8,19 +9,34 @@ int VSENS = D0;
 bool isJumping = false;
 // long startTime = millis(); // track time
 
-std::vector<int> jumpList; 
+std::vector<int> jumpList;
 
 /* - - - - - - - - - - - - - - - - - // - - - - - - - - - - - - - - - - - */
+#pragma region systemFuncs
 
 void setup() {
+  beginJumpStuffs();
+  beginCactusStuffs();
+}
+
+void loop()
+{
+  jumpCheckLoop();
+  cactusMoveLoop();
+}
+
+#pragma endregion systemFuncs
+
+#pragma region jumpCodings
+
+void beginJumpStuffs() {
   pinMode(VSENS, INPUT_PULLUP);
   Serial.begin(9600);
-
 }
-/* - - - - - - - - - - - - - - - - - // - - - - - - - - - - - - - - - - - */
+
 int jumpMilSecs = 0;
 // - - - - - - -
-void loop(){
+void jumpCheckLoop(){
   long vsenstime;
 
   // vSensCheck();
@@ -36,6 +52,67 @@ void loop(){
     jumpMilSecs = 0;
   }
 }
+
+#pragma endregion jumpCodings
+
+#pragma region cactusControls
+
+
+Servo cactus;
+int signalCord = D0;
+int signalTime = 2;
+int popOutTime = 1000;
+int minDelay = 2000, maxDelay = 7001;
+
+
+void beginCactusStuffs() {
+  // pinMode(LED_BUILTIN, OUTPUT); //LED_BUITIN always hits the built in LED for some reason
+  Serial.begin(9600);
+  randomSeed(analogRead(A0));
+  pinMode(signalCord, INPUT);
+  cactus.attach(D10);
+}
+
+void cactusMoveLoop() {
+  // digitalWrite(LED_BUILTIN, HIGH);
+  waitForRandomTime();
+  popOut();
+}
+
+void SignalAttempt()
+{
+  pinMode(signalCord, OUTPUT); //This part is to send a signal to know that it wants to throw the cactus
+  digitalWrite(signalCord, HIGH);
+  delay(signalTime);
+  digitalWrite(signalCord, LOW);
+  pinMode(signalCord, INPUT);
+}
+
+void popOut()
+{
+  cactus.write(180); //This is to actually send out the cactus
+  delay(popOutTime);
+  cactus.write(0);
+}
+
+void waitForRandomTime()
+{
+  int rand = random(minDelay, maxDelay);
+  Serial.println(rand);
+  delay(rand);
+}
+
+
+#pragma endregion cactusControls
+
+
+
+
+
+
+
+
+
 /* - - - - - - - - - - - - - - - - - // - - - - - - - - - - - - - - - - - */
 // void JumpCheck() {
 //   if (jumpMilSecs > 200) {
