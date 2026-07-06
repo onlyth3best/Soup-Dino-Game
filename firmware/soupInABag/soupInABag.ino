@@ -11,6 +11,9 @@ bool isJumping = false;
 
 std::vector<int> jumpList;
 
+int lastTimeChecked;
+int timeElapsed;
+
 /* - - - - - - - - - - - - - - - - - // - - - - - - - - - - - - - - - - - */
 #pragma region systemFuncs
 
@@ -21,9 +24,16 @@ void setup() {
 
 void loop()
 {
+  ElapseTime();
   jumpCheckLoop();
   // cactusMoveLoop();
   // sensorIsOn();
+}
+
+void ElapseTime()
+{
+  timeElapsed = millis() - lastTimeChecked;
+  lastTimeChecked = millis();
 }
 
 #pragma endregion systemFuncs
@@ -85,6 +95,9 @@ int signalTime = 2;
 int popOutTime = 1000;
 int minDelay = 2000, maxDelay = 7001;
 
+String stage = "";
+int decidedDelayTime;
+
 
 void beginCactusStuffs() {
   // pinMode(LED_BUILTIN, OUTPUT); //LED_BUITIN always hits the built in LED for some reason
@@ -92,12 +105,23 @@ void beginCactusStuffs() {
   randomSeed(analogRead(A0));
   pinMode(signalCord, INPUT);
   cactus.attach(D10);
+
+  stage = "cooldown";
+  decidedDelayTime = chooseRandTimeToWait();
 }
 
 void cactusMoveLoop() {
   // digitalWrite(LED_BUILTIN, HIGH);
-  waitForRandomTime();
-  popOut();
+  // waitForRandomTime();
+  // popOut();
+
+  if(delayCactusStepForSecs("cooldown", decidedDelayTime, "popOut")) //waits for cooldown (on popOut)
+    cactus.write(80);
+  else if(delayCactusStepForSecs("popOut", popOutTime, "cooldown")) //waits for popOutTime (onCooldown)
+  {
+    cactus.write(0);
+    decidedDelayTime = chooseRandTimeToWait();
+  }
 }
 
 void SignalAttempt()
@@ -123,6 +147,29 @@ void waitForRandomTime()
   delay(rand);
 }
 
+int chooseRandTimeToWait()
+{
+  int rand = random(minDelay, maxDelay);
+  return rand;
+}
+
+int timeSinceLastPassedStep = 0;
+bool delayCactusStepForSecs(String step, int timeToStall, String nextStep)
+{
+  if(step == stage)
+  {
+    timeSinceLastPassedStep += timeElapsed;
+    
+    if(timeSinceLastPassedStep >= timeToStall)
+    {
+      timeSinceLastPassedStep -= timeToStall;
+      stage = nextStep;
+      return true;
+    }
+  }
+  
+  return false;
+}
 
 #pragma endregion cactusControls
 
@@ -131,6 +178,19 @@ void waitForRandomTime()
 //   if (digitalRead(VSENS) == HIGH) {
 //     Serial.println("The sensor is on!");
 //     delay(100);
+
+
+
+
+
+
+/* - - - - - - - - - - - - - - - - - // - - - - - - - - - - - - - - - - - */
+// void JumpCheck() {
+//   if (jumpMilSecs > 200) {
+//     if (((jumpList[jumpMilSecs + 1]) && (jumpList[jumpMilSecs + 2]) && (jumpList[jumpMilSecs + 3]) && (jumpList[jumpMilSecs + 4])) > 200) {
+//       isJumping == true;
+//       Serial.println("PLAYER IS JUMPINGG");
+//     }
 //   }
 // }
 
